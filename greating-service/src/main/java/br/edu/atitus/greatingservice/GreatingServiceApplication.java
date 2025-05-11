@@ -1,4 +1,4 @@
-package br.edu.atitus.greating_service;
+package br.edu.atitus.greatingservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class GreatingServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GreatingServiceApplication.class, vargs);
+		SpringApplication.run(GreatingServiceApplication.class, args);
 	}
 
 }

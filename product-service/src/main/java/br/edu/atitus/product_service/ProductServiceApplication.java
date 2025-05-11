@@ -1,13 +1,13 @@
-package br.edu.atitus.greating_service;
+package br.edu.atitus.product_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class GreatingServiceApplication {
+public class ProductServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GreatingServiceApplication.class, vargs);
+		SpringApplication.run(ProductServiceApplication.class, args);
 	}
 
 }

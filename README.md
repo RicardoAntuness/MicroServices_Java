@@ -1,2 +1,2 @@
-# MicroServices_Java
-Projeto de Microsservices em Java utilizando Spring Boot.
+# microservices-java
+Projeto de Microservices em Java utilizando Spring Boot
