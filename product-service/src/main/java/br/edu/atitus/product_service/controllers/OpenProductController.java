@@ -7,22 +7,26 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.edu.atitus.product_service.clients.CurrencyClient;
+import br.edu.atitus.product_service.clients.CurrencyResponse;
 import br.edu.atitus.product_service.entities.ProductEntity;
 import br.edu.atitus.product_service.repositories.ProductRepository;
 
 @RestController
 @RequestMapping("products")
 public class OpenProductController {
-	
-	private final ProductRepository repository;
+	private final ProductRepository repo;
+	private final CurrencyClient currencyClient;
 
-	public OpenProductController(ProductRepository repository) {
+	public OpenProductController(ProductRepository repo, CurrencyClient currencyClient) {
 		super();
-		this.repository = repository;
+		this.repo = repo;
+		this.currencyClient = currencyClient;
 	}
 	
 	@Value("${server.port}")
 	private int serverPort;
+
 	
 	@GetMapping("/{idProduct}/{targetCurrency}")
 	public ResponseEntity<ProductEntity> getProduct(
@@ -32,9 +36,17 @@ public class OpenProductController {
 		ProductEntity product = repository.findById(idProduct)
 				.orElseThrow(() -> new Exception("Product Unsupported"));
 		
-		product.setConvertedPrice(product.getPrice());
 		product.setEnvironment("Product-service running on port: " + serverPort);
 		
+		if(targetCurrency.equals(product.getCurrency()))
+			product.setConvertedPrice(product.getPrice());
+		
+		else {
+			CurrencyResponse currency = CurrencyClient.getCurrency(product.getPrice(), product.getCurrency(), targetCurrency())
+			product.setConvertedPrice(currency.getContertedValue());
+			product.setEnvironment(product.getEnvironment() + "-" + currency.getEnvironment());
+		}
+
 		return ResponseEntity.ok(product);
 	}
 
