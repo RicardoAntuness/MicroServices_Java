@@ -1,45 +1,26 @@
 package br.edu.atitus.currency_service.controllers;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import br.edu.atitus.currency_service.entities.CurrencyEntity;
-import br.edu.atitus.currency_service.repositories.CurrencyRepository;
-
-import org.springframework.beans.factory.annotation.Value;
+import br.edu.atitus.currency_service.client.CurrencyBCClient;
+import br.edu.atitus.currency_service.dto.CurrencyBCResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("currency")
+@RequestMapping("/currency")
 public class CurrencyController {
+    
+    private final CurrencyBCClient currencyBCClient;
 
-	private final CurrencyRepository repository;
+    public CurrencyController(CurrencyBCClient currencyBCClient) {
+        this.currencyBCClient = currencyBCClient;
+    }
 
-	public CurrencyController(CurrencyRepository repository) {
-		super();
-		this.repository = repository;
-	}
-	
-	@Value("${server.port}")
-	private int serverPort;
-	
-	@GetMapping("/{value}/{source}/{target}")
-	public ResponseEntity<CurrencyEntity> getCurrency(
-			@PathVariable double value,
-			@PathVariable String source,
-			@PathVariable String target
-			) throws Exception{
-		CurrencyEntity currency = repository.findBySourceAndTarget(source, target)
-				.orElseThrow(() -> new Exception("Currency Unsupported"));
-		
-		currency.setConvertedValue(value * currency.getConversionRate());
-		currency.setEnviroment("Currency-service running on port: " + serverPort);
-		
-		return ResponseEntity.ok(currency);
-	}
-	
+    @GetMapping("/{moeda}")
+    public ResponseEntity<Double> getCotacao(@PathVariable String moeda) {
+        CurrencyBCResponse response = currencyBCClient.getCotacaoMoedaDia(moeda);
+        if (response.getValue() != null && !response.getValue().isEmpty()) {
+            return ResponseEntity.ok(response.getValue().get(0).getCotacaoVenda());
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
