@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class GreatingServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GreatingServiceApplication.class, vargs);
+		SpringApplication.run(GreatingServiceApplication.class, args);
 	}
 
 }

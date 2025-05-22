@@ -15,18 +15,18 @@ import br.edu.atitus.product_service.repositories.ProductRepository;
 @RestController
 @RequestMapping("products")
 public class OpenProductController {
-	private final ProductRepository repo;
+	
+	private final ProductRepository repository;
 	private final CurrencyClient currencyClient;
 
-	public OpenProductController(ProductRepository repo, CurrencyClient currencyClient) {
+	public OpenProductController(ProductRepository repository, CurrencyClient currencyClient) {
 		super();
-		this.repo = repo;
+		this.repository = repository;
 		this.currencyClient = currencyClient;
 	}
 	
 	@Value("${server.port}")
 	private int serverPort;
-
 	
 	@GetMapping("/{idProduct}/{targetCurrency}")
 	public ResponseEntity<ProductEntity> getProduct(
@@ -37,16 +37,14 @@ public class OpenProductController {
 				.orElseThrow(() -> new Exception("Product Unsupported"));
 		
 		product.setEnvironment("Product-service running on port: " + serverPort);
-		
-		if(targetCurrency.equals(product.getCurrency()))
-			product.setConvertedPrice(product.getPrice());
-		
-		else {
-			CurrencyResponse currency = CurrencyClient.getCurrency(product.getPrice(), product.getCurrency(), targetCurrency())
-			product.setConvertedPrice(currency.getContertedValue());
-			product.setEnvironment(product.getEnvironment() + "-" + currency.getEnvironment());
-		}
 
+		if (product.getCurrency().equals(targetCurrency)) {
+			product.setConvertedPrice(product.getPrice());
+		} else {
+			CurrencyResponse currency = currencyClient.getCurrency(product.getPrice(),product.getCurrency(),targetCurrency);
+			product.setConvertedPrice(currency.getContertedValue());
+			product.setEnvironment(product.getEnvironment() + " - " + currency.getEnvironment());
+		}
 		return ResponseEntity.ok(product);
 	}
 

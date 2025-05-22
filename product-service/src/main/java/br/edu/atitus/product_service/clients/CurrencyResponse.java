@@ -7,7 +7,7 @@ public class CurrencyResponse {
 	private String target;
 	private double conversionRate;
 	private String environment;
-	private double contertedValue;
+	private double convertedValue;
 	
 	public Long getId() {
 		return id;
@@ -40,9 +40,9 @@ public class CurrencyResponse {
 		this.environment = environment;
 	}
 	public double getContertedValue() {
-		return contertedValue;
+		return convertedValue;
 	}
 	public void setContertedValue(double contertedValue) {
-		this.contertedValue = contertedValue;
+		this.convertedValue = contertedValue;
 	}
 }
