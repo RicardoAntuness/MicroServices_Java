@@ -1,5 +1,6 @@
 package br.edu.atitus.product_service.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.edu.atitus.product_service.ProductServiceApplication;
 import br.edu.atitus.product_service.clients.CurrencyClient;
 import br.edu.atitus.product_service.clients.CurrencyResponse;
 import br.edu.atitus.product_service.entities.ProductEntity;
@@ -16,6 +18,7 @@ import br.edu.atitus.product_service.repositories.ProductRepository;
 @RequestMapping("products")
 public class OpenProductController {
 	
+@Autowired
 	private final ProductRepository repository;
 	private final CurrencyClient currencyClient;
 
@@ -27,6 +30,7 @@ public class OpenProductController {
 	
 	@Value("${server.port}")
 	private int serverPort;
+	private ProductServiceApplication productService;
 	
 	@GetMapping("/{idProduct}/{targetCurrency}")
 	public ResponseEntity<ProductEntity> getProduct(
@@ -42,10 +46,18 @@ public class OpenProductController {
 			product.setConvertedPrice(product.getPrice());
 		} else {
 			CurrencyResponse currency = currencyClient.getCurrency(product.getPrice(),product.getCurrency(),targetCurrency);
-			product.setConvertedPrice(currency.getContertedValue());
+			product.setConvertedPrice(currency.getConvertedValue());
 			product.setEnvironment(product.getEnvironment() + " - " + currency.getEnvironment());
 		}
 		return ResponseEntity.ok(product);
+	}
+
+	public ProductServiceApplication getProductService() {
+		return getProductService();
+	}
+
+	public void setProductService(ProductServiceApplication productService) {
+		this.productService = productService;
 	}
 
 }
