@@ -2,6 +2,7 @@ package br.edu.atitus.product_service.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,30 +18,40 @@ import br.edu.atitus.product_service.repositories.ProductRepository;
 @RestController
 @RequestMapping("products")
 public class OpenProductController {
-	
-@Autowired
+
+	@Autowired
 	private final ProductRepository repository;
 	private final CurrencyClient currencyClient;
+	private final CacheManager cacheManager;
 
-	public OpenProductController(ProductRepository repository, CurrencyClient currencyClient) {
+	public OpenProductController(ProductRepository repository, CurrencyClient currencyClient,
+			CacheManager cacheManager) {
 		super();
 		this.repository = repository;
 		this.currencyClient = currencyClient;
+		this.cacheManager = cacheManager;
 	}
-	
+
 	@Value("${server.port}")
 	private int serverPort;
-	private ProductServiceApplication productService;
-	
+
 	@GetMapping("/{idProduct}/{targetCurrency}")
 	public ResponseEntity<ProductEntity> getProduct(
 			@PathVariable Long idProduct,
 			@PathVariable String targetCurrency
 			) throws Exception{
-		ProductEntity product = repository.findById(idProduct)
-				.orElseThrow(() -> new Exception("Product Unsupported"));
 		
-		product.setEnvironment("Product-service running on port: " + serverPort);
+		targetCurrency= targetCurrency.toUpperCase();
+		String nameCache = "Product";
+		String keyCache = idProduct + targetCurrency;
+		
+		ProductEntity product = cacheManager.getCache(nameCache).get(keyCache, ProductEntity.class);
+
+		
+		if(product == null) {
+			product = repository.findById(idProduct).orElseThrow(() -> new Exception ("Product not found"));
+		
+			product.setEnvironment("Product-service running on port: " + serverPort);
 
 		if (product.getCurrency().equals(targetCurrency)) {
 			product.setConvertedPrice(product.getPrice());
@@ -49,11 +60,16 @@ public class OpenProductController {
 			if(currency != null) {
 				product.setConvertedPrice(currency.getConvertedValue());
 				product.setEnvironment(product.getEnvironment() + " - " + currency.getEnvironment());
+				
+					cacheManager.getCache(nameCache).put(keyCache, product);
 				} else {
 					product.setConvertedPrice(-1);
 					product.setEnvironment(product.getEnvironment() + " - Currency unavalaible");
 				}
 			}
+		} else {
+			product.setEnvironment("Product-service running on port: " + serverPort + " - DataSource: cache" );
+		}
 		return ResponseEntity.ok(product);
 	}
 
@@ -62,7 +78,6 @@ public class OpenProductController {
 	}
 
 	public void setProductService(ProductServiceApplication productService) {
-		this.productService = productService;
 	}
 
 }

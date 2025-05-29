@@ -81,10 +81,11 @@
 			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
 		</dependency>
 		
-		<dependency>
+	<!-- https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine -->
+<dependency>
     <groupId>com.github.ben-manes.caffeine</groupId>
     <artifactId>caffeine</artifactId>
-    <version>3.1.6</version>
+    <version>3.2.0</version>
 </dependency>
 
 <dependency>
